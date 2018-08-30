@@ -1,0 +1,22 @@
+{
+  "name": "buytoo",
+  "version": "1.0.0",
+  "description": "An ecommerce initiative API",
+  "main": "indexEcom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darkie8/buytoo-ecom.git"
+  },
+  "keywords": [
+    "buytoo"
+  ],
+  "author": "Sayantan Saha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darkie8/buytoo-ecom/issues"
+  },
+  "homepage": "https://github.com/darkie8/buytoo-ecom#readme"
+}
