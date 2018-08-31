@@ -1,3 +1,11 @@
-const app = require('express')();
-const mongoose = require('mongoose');
+const app = require('express')(); // to use express
+const mongoose = require('mongoose'); // to use mongoose
 const fs = require('fs');
+
+//using body-parser and cookie-parser
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+

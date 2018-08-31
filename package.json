@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/darkie8/buytoo-ecom#readme",
   "dependencies": {
+    "@types/express": "^4.16.0",
     "@types/pino": "^5.20.0",
     "apidoc": "^0.17.6",
     "body-parser": "^1.18.3",
