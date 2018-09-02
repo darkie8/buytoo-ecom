@@ -9,3 +9,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 
+let modelPath= './model';
+fs.readdirSync(modelPath).forEach(file =>{
+if(~file.indexOf('.js')) require(`${modelPath}/${file}`)} )
