@@ -444,18 +444,6 @@ const ecomSchema_mobile = new schema({
 })
 
 // model declration 
-mongoose.model('source', source);
-mongoose.model('rating', rating);
-mongoose.model('description', desc);
-mongoose.model('display', Display_Features);
-mongoose.model('os_processor', Os_and_Processor_Features);
-mongoose.model('memory', Memory_and_Storage_Features);
-mongoose.model('connectivity', Connectivity_Features);
-mongoose.model('multimedia', Multimedia_Features);
-mongoose.model('camera', Camera_Features);
-mongoose.model('battery', Battery_and_Power_Features);
-mongoose.model('dimensions', Dimensions);
-mongoose.model('warrany_gurantee', Warranty_and_Gurantee);
 mongoose.model('basic', basic);
 mongoose.model('watches', ecomSchema_watch);
 mongoose.model('mobiles', ecomSchema_mobile);
