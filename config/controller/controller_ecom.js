@@ -8,9 +8,30 @@ const check = require('./../../library/checkLib');
 const logger = require('./../../library/loggerLib');
 const other = require('./../../library/othersLib')
 // Importing model_ecom 
-let response_model = mongoose.model('model_ecom')
-let zoomba = mongoose.model('test_4');
-// creating product info document in database
+let zoomba = mongoose.model('test_6');
+
+const response_model = {
+    source: mongoose.model('test_6_basic_info_source'),
+    rating: mongoose.model('test_6_basic_info_rating'),
+    desc: mongoose.model('test_6_basic_info_desc'),
+    Display_Features: mongoose.model('display1'),
+    Os_and_Processor_Features: mongoose.model('os_processor1'),
+    Memory_and_Storage_Features: mongoose.model('memory1'),
+    Connectivity_Features: mongoose.model('connectivity1'),
+    Multimedia_Features: mongoose.model('multimedia1'),
+    Camera_Features: mongoose.model('camera1'),
+    Battery_and_Power_Features: mongoose.model('battery1'),
+    Dimensions: mongoose.model('dimensions1'),
+    Warranty_and_Gurantee: mongoose.model('warrany_gurantee2'),
+    basic: mongoose.model('test_6_basic_info'),
+    model_ecom: mongoose.model('model_ecomF')
+}
+
+
+/**
+ * function to create document
+ */
+
 let create_response = (req, res) => {
 
     const reqBod = req.body;
@@ -38,32 +59,32 @@ let create_response = (req, res) => {
         Suitable: reqBod.Suitable
     }
 
-    let Display_Features = {
+    let Display_Features = new response_model.Display_Features({
         Display_Size: reqBod.Display_Size,
         Resolution: reqBod.Resolution,
         Resolution_Type: reqBod.Resolution_Type,
         GPU: reqBod.GPU,
         Display_Type: reqBod,
         Display_Colors: reqBod.Display_Colors
-    }
+    })
 
-    let Os_and_Processor_Features = {
+    let Os_and_Processor_Features = new response_model.Os_and_Processor_Features({
         Operating_System: reqBod.Operating_System,
         Processor_Type: reqBod.Processor_Type,
         Processor_Core: reqBod.Processor_Core,
         Primary_Clock_Speed: reqBod.Primary_Clock_Speed
-    }
+    })
 
-    let Memory_and_Storage_Features = {
+    let Memory_and_Storage_Features = new response_model.Memory_and_Storage_Features({
         Internal_Storage: reqBod.Internal_Storage,
         RAM: reqBod.RAM,
         Total_Memory: reqBod.Total_Memory,
         Expandable_Storage: reqBod.Expandable_Storage,
         Supported_Memory_Card_Type: reqBod.Supported_Memory_Card_Type,
         Memory_Card_Slot_Type: reqBod.Memory_Card_Slot_Type
-    }
+    })
 
-    let Connectivity_Features = {
+    let Connectivity_Features = new response_model.Connectivity_Features({
         Network_Type: reqBod.Network_Type,
         Supported_Networks: reqBod.Supported_Networks,
         threeG: reqBod.threeG,
@@ -71,16 +92,16 @@ let create_response = (req, res) => {
         Bluetooth_Version: reqBod.Bluetooth_Support,
         Wi_Fi: reqBod.Wi_Fi,
         Audio_Jack: reqBod.Audio_Jack
-    }
+    })
 
-    let Multimedia_Features = {
+    let Multimedia_Features = new response_model.Multimedia_Features({
         FM_Radio: reqBod.FM_Radio,
         FM_Radio_Recording: reqBod.FM_Radio_Recording,
         Audio_Formats: reqBod.Audio_Formats,
         Video_Formats: reqBod.Video_Formats
-    }
+    })
 
-    let Camera_Features = {
+    let Camera_Features = new response_model.Camera_Features({
         Primary_Camera_Available: reqBod.Primary_Camera_Available,
         Primary_Camera: reqBod.Primary_Camera,
         Primary_Camera_Features: reqBod.Primary_Camera_Features,
@@ -89,23 +110,23 @@ let create_response = (req, res) => {
         Flash: reqBod.Flash,
         Full_HD_Recording: reqBod.Full_HD_Recording,
         Frame_Rate: reqBod.Frame_Rate
-    }
+    })
 
-    let Battery_and_Power_Features = {
+    let Battery_and_Power_Features = new response_model.Battery_and_Power_Features({
         Battery_Capacity: reqBod.Battery_Capacity
-    }
+    })
 
-    let Dimensions = {
+    let Dimensions = new response_model.Dimensions({
         Width: reqBod.Width,
         Height: reqBod.Height,
         Depth: reqBod.Depth,
         Weight: reqBod.Weight
-    }
+    })
 
-    let Warranty_and_Gurantee = {
+    let Warranty_and_Gurantee = new response_model.Warranty_and_Gurantee({
         Warranty_Summary: reqBod.Warranty_Summary,
         Gurantee_Summary: reqBod.Gurantee_Summary
-    }
+    })
     let product_id = shortid.generate();
     let basic_response = {
         url: 'https://buytoo.in',
@@ -131,7 +152,7 @@ let create_response = (req, res) => {
         Last_bought: reqBod.Last_bought
     }
 
-    let ecom_resp = new response_model({
+    let ecom_resp = new response_model.model_ecom({
         basic_info: basic_response,
         Browse_Type: reqBod.Browse_Type,
         Band_Colour: reqBod.Band_Color,
@@ -157,24 +178,27 @@ let create_response = (req, res) => {
         Graphics_PPI: reqBod.Graphics_PPI,
         Warranty_and_Gurantee: Warranty_and_Gurantee
     })
-    let zoomba_res = new zoomba({
-        basic_info: basic_response
-    })
 
+    // saving the inputs to make tables in collection
+    ecom_resp.save(
 
-    zoomba_res.save(other.saveFunction(res, zoomba_res._id))
+        // callback for what to show in console 
+
+        other.saveFunction(res, ecom_resp._id))
 
 
 
 } // function ends
 
-// seeing all product documents
+/**
+ * function to see all the blog
+ */
 
 let show_all = (req, res) => {
 
 
-    response_model.find()
-        .select('-__v -_id')
+    response_model.model_ecom.find()
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
         .lean()
         .exec((err, result) => {
             if (err) {
@@ -192,7 +216,66 @@ let show_all = (req, res) => {
 
 }
 
+/**
+ * function to read single product info sorted by Product ID.
+ */
+let viewByproduct_id = (req, res) => {
+
+    response_model.model_ecom.find()
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .lean()
+        .exec((err, result) => {
+
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewByproduct_id ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError('product info can not be found', 'controller.js : viewByproduct_id', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                if (result.every(obj => obj.basic_info.product_id !== req.params.product_id)) {
+                    logger.captureError('product info can not be found', 'controller.js : viewByproduct_id', 10);
+                    res.send(responses.generate(true, 'product info can not be found', 404, null));
+                } else {
+                    let result_indv = result.find(obj => obj.basic_info.product_id === req.params.product_id)
+                    logger.captureInfo('All product infos found', 'controller.js : viewByproduct_id ', 5);
+                    res.send(responses.generate(false, `${req.params.product_id} product info details found`, 200, result_indv));
+                }
+            }
+        })
+}
+
+/**
+ * function to read single product info sorted by UUID.
+ */
+let viewBy_uuid = (req, res) => {
+
+    response_model.model_ecom.find()
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .lean()
+        .exec((err, result) => {
+
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewBy_uuid ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError('product info can not be found', 'controller.js : viewBy_uuid', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                if (result.every(obj => obj.basic_info.uuid !== req.params.uuid)) {
+                    logger.captureError('product info can not be found', 'controller.js : viewBy_uuid', 10);
+                    res.send(responses.generate(true, 'product info can not be found', 404, null));
+                } else {
+                    let result_indv = result.find(obj => obj.basic_info.uuid === req.params.uuid)
+                    logger.captureInfo('All product infos found', 'controller.js : viewBy_uuid ', 5);
+                    res.send(responses.generate(false, `${req.params.uuid} uuid product info details found`, 200, result_indv));
+                }
+            }
+        })
+}
 module.exports = {
     show_all: show_all,
     create_response: create_response,
+    viewByproduct_id: viewByproduct_id,
+    viewBy_uuid: viewBy_uuid
 }

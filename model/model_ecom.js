@@ -439,18 +439,27 @@ let ecomSchema = new schema({
   Warranty_and_Gurantee: Warranty_and_Gurantee
 })
 
-let test_4  = new schema({
-  basic_info: basic_info
-  
+let test_6  = new schema({
+  basic_info: basic_info,
+  Display_Features: Display_Features,
 })
 
 // model declration 
-mongoose.model('test_4_basic_info_source', source)
-mongoose.model('test_4_basic_info_desc', desc)
-mongoose.model('test_4_basic_info_rating', rating)
-mongoose.model('test_4_basic_info', basic_info)
-mongoose.model('test_4', test_4)
-mongoose.model('model_ecom', ecomSchema);
+mongoose.model('test_6_basic_info_source', source)
+mongoose.model('test_6_basic_info_desc', desc)
+mongoose.model('test_6_basic_info_rating', rating)
+mongoose.model('test_6_basic_info', basic_info)
+mongoose.model('display1', Display_Features);
+mongoose.model('os_processor1', Os_and_Processor_Features);
+mongoose.model('memory1', Memory_and_Storage_Features);
+mongoose.model('connectivity1', Connectivity_Features);
+mongoose.model('multimedia1', Multimedia_Features);
+mongoose.model('camera1', Camera_Features);
+mongoose.model('battery1', Battery_and_Power_Features);
+mongoose.model('dimensions1', Dimensions);
+mongoose.model('warrany_gurantee2', Warranty_and_Gurantee);
+mongoose.model('test_6', test_6)
+mongoose.model('model_ecomF', ecomSchema);
 
 
 
