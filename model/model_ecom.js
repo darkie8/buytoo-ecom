@@ -1,9 +1,9 @@
 // mongoose 
-const mongoose = require("mongoose");
-const schema = mongoose.Schema;
+let mongoose = require("mongoose");
+let schema = mongoose.Schema;
 
 // source schema declaration
-const source = new schema({
+let source = new schema({
   site: {
     type: String,
     
@@ -22,8 +22,9 @@ const source = new schema({
   }
 })
 
+
 // description schema declaration 
-const desc = new schema(
+let desc = new schema(
   {
       Band_Color: {
         type: String,
@@ -56,7 +57,7 @@ const desc = new schema(
 
 // rating schema 
 
-const rating = new schema({
+let rating = new schema({
   mean_rating: {
     type: Number,
    
@@ -80,7 +81,7 @@ const rating = new schema({
 })
 
 // basic schema
-const basic = new schema({
+let basic_info = new schema({
   url: {
     type: String,
     
@@ -159,7 +160,7 @@ const basic = new schema({
 })
 
 // display features schema
-const Display_Features = new schema({
+let Display_Features = new schema({
   Display_Size: {
     type: String,
     
@@ -188,7 +189,7 @@ const Display_Features = new schema({
 
 // Os & Processor Features schema
 
-const Os_and_Processor_Features = new schema({
+let Os_and_Processor_Features = new schema({
   Operating_System: {
     type: String,
     
@@ -208,7 +209,7 @@ const Os_and_Processor_Features = new schema({
 })
 
 // Memory & Storage Features schema 
-const Memory_and_Storage_Features = new schema({
+let Memory_and_Storage_Features = new schema({
   Internal_Storage: {
     type: String,
     
@@ -237,7 +238,7 @@ const Memory_and_Storage_Features = new schema({
 
 // Connectivity Features schema
 
-const Connectivity_Features = new schema({
+let Connectivity_Features = new schema({
   Network_Type: {
     type: Array,
    
@@ -269,7 +270,7 @@ const Connectivity_Features = new schema({
 })
 
 // Multimedia Features schema
-const Multimedia_Features = new schema({
+let Multimedia_Features = new schema({
   FM_Radio: {
     type: String,
    
@@ -291,7 +292,7 @@ const Multimedia_Features = new schema({
 
 // Camera Features schema
 
-const Camera_Features = new schema({
+let Camera_Features = new schema({
   Primary_Camera_Available: {
     type: String,
     
@@ -327,7 +328,7 @@ const Camera_Features = new schema({
 })
 
 // Battery_and_Power_Features scema
-const Battery_and_Power_Features = new schema({
+let Battery_and_Power_Features = new schema({
   Battery_Capacity: {
     type: String,
  
@@ -335,7 +336,7 @@ const Battery_and_Power_Features = new schema({
 })
 
 // Dimensions schema
-const Dimensions = new schema({
+let Dimensions = new schema({
   Width: {
     type: String,
     
@@ -356,7 +357,7 @@ const Dimensions = new schema({
 
 // Warranty and gurantee schema
 
-const Warranty_and_Gurantee = new schema({
+let Warranty_and_Gurantee = new schema({
   Warranty_Summary: {
     type: String,
     
@@ -368,8 +369,8 @@ const Warranty_and_Gurantee = new schema({
 })
 
 // ecom schema for watch declaration 
-const ecomSchema_watch = new schema({
-  watch_basic_info: basic,
+let ecomSchema = new schema({
+  basic_info: basic_info,
   Band_Colour: {
     type: String,
   
@@ -386,11 +387,6 @@ const ecomSchema_watch = new schema({
     type: Array,
    
   },
-  Warranty_and_Gurantee: Warranty_and_Gurantee
-});
-
-const ecomSchema_mobile = new schema({
-  mobile_basic_info: basic,
   Browse_Type: {
     type: String,
     
@@ -443,7 +439,20 @@ const ecomSchema_mobile = new schema({
   Warranty_and_Gurantee: Warranty_and_Gurantee
 })
 
+let test_4  = new schema({
+  basic_info: basic_info
+  
+})
+
 // model declration 
-mongoose.model('basic', basic);
-mongoose.model('watches', ecomSchema_watch);
-mongoose.model('mobiles', ecomSchema_mobile);
+mongoose.model('test_4_basic_info_source', source)
+mongoose.model('test_4_basic_info_desc', desc)
+mongoose.model('test_4_basic_info_rating', rating)
+mongoose.model('test_4_basic_info', basic_info)
+mongoose.model('test_4', test_4)
+mongoose.model('model_ecom', ecomSchema);
+
+
+
+
+
