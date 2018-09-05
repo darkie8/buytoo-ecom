@@ -151,14 +151,14 @@ let create_response = (req, res) => {
         Date_first_available_at_buytoo: reqBod.Date_first_available_at_buytoo,
         Last_bought: reqBod.Last_bought
     }
-
+    let categories = (!check.isEmpty(reqBod.categories)) ? reqBod.categories.split(',') : []
     let ecom_resp = new response_model.model_ecom({
         basic_info: basic_response,
         Browse_Type: reqBod.Browse_Type,
         Band_Colour: reqBod.Band_Color,
         Display_Type: reqBod.Display_Type,
         Dial_Colour: reqBod.Dial_Colour,
-        categories: reqBod.categories,
+        categories: categories,
         SIM: reqBod.SIM,
         Hybrid_Sim_Slot: reqBod.Hybrid_Sim_Slot,
         Touchscreen: reqBod.Touchscreen,
@@ -273,9 +273,176 @@ let viewBy_uuid = (req, res) => {
             }
         })
 }
+
+/**
+ * function to find product document by category.
+ */
+let viewByCategory = (req, res) => {
+    let categories1 = (!check.isEmpty(req.params.categories)) ? req.params.categories.split('_') : []
+
+    /*response_model.model_ecom.find({
+            "categories": [...categories1]
+        }).select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .lean()
+        .exec((err, result) => {
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewByCategory ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : viewByCategory', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                logger.captureInfo("products' infos has been found", 'controller.js : viewByCategory', 5);
+                res.send(responses.generate(false, `All product info details of ${categories1}  found`, 200, result));
+            }
+        })*/
+
+
+    response_model.model_ecom.find()
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .lean()
+        .exec((err, result) => {
+
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewByCategory ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : viewByCategory', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                if (result.every(obj => {
+                        let set1 = new Set([...obj.categories, ...categories1])
+                        return obj.categories.length !== [...set1].length
+                    })) {
+
+                    logger.captureError(` product info can not be found`, 'controller.js : viewByCategory', 10);
+                    res.send(responses.generate(true, 'product info can not be found', 404, null));
+                } else {
+                    let result_indv = result.filter(obj => {
+                        let set2 = new Set([...obj.categories, ...categories1])
+                        return obj.categories.length === [...set2].length
+                    })
+                    logger.captureInfo("products' infos has been found", 'controller.js : viewByCategory', 5);
+                    res.send(responses.generate(false, `All product info details of ${categories1}  found`, 200, result_indv));
+                }
+            }
+        })
+}
+
+/**
+ * function to edit product info  by admin.
+ */
+let editProduct_info = (req, res) => {
+
+    let options = req.body;
+
+    // to update the subdocs and sub-sub-docs use the object key sequence (eg: to update the price => put basic_info.price in request body)
+
+    console.log(options);
+    response_model.model_ecom.update({
+        'basic_info.product_id': req.params.product_id
+    }, options, {
+        multi: true
+    }).exec((err, result) => {
+
+        if (err) {
+            logger.captureError("internal server error", 'controller.js : editProduct_info ', 10)
+            res.send(responses.generate(true, 'Failed to edit the doc', 500, null));
+        } else if (check.isEmpty(result)) {
+            logger.captureError(` product info can not be found`, 'controller.js : editProduct_info', 10);
+            res.send(responses.generate(true, 'product info can not be found', 404, null));
+        } else {
+            logger.captureInfo("products' infos has been updated", 'controller.js : editProduct_info', 5);
+            res.send(responses.generate(false, `${req.params.product_id} id product info doc has been updated`, 200, result));
+
+        }
+    })
+}
+
+/**
+ * function to delete the product info.
+ */
+let deleteProduct_info = (req, res) => {
+    response_model.model_ecom.remove({
+        'basic_info.product_id': req.params.product_id
+    }, (err, result) => {
+        if (err) {
+            logger.captureError("internal server error", 'controller.js : deleteProduct_info ', 10)
+            res.send(responses.generate(true, 'Failed to delete the doc', 500, null));
+        } else if (check.isEmpty(result)) {
+            logger.captureError(` product info can not be found`, 'controller.js : deleteProduct_info', 10);
+            res.send(responses.generate(true, 'product info can not be found', 404, null));
+        } else {
+            logger.captureInfo("products' infos has been deleted", 'controller.js : deleteProduct_info', 5);
+            res.send(responses.generate(false, `${req.params.product_id} id product info doc has been deleted`, 200, result));
+
+        }
+    })
+}
+
+/**
+ * function to delete the product info of same categories.
+ */
+let deletePrduct_info_byCategory = (req, res) => {
+    let categories1 = (!check.isEmpty(req.params.categories)) ? req.params.categories.split('_') : [];
+    let prod_id_array = []
+    response_model.model_ecom.find()
+        .exec((err, result) => {
+
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewByCategory ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : viewByCategory', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                if (result.every(obj => {
+                        let set1 = new Set([...obj.categories, ...categories1])
+                        return obj.categories.length !== [...set1].length
+                    })) {
+                    logger.captureError(` product info can not be found`, 'controller.js : deletePrduct_info_byCategory', 10);
+                    res.send(responses.generate(true, 'product info can not be found', 404, null));
+                } else {
+                    let result_indv = result.filter(obj => {
+                        let set2 = new Set([...obj.categories, ...categories1])
+                        return obj.categories.length === [...set2].length
+                    })
+                    logger.captureInfo("products' infos has been found", 'controller.js : deletePrduct_info_byCategory', 5);
+                    result_indv.forEach(obj => {
+
+                        response_model.model_ecom.remove({
+                            'basic_info.product_id': obj.basic_info.product_id
+                        }, (err, result) => {
+                            if (err) {
+                                logger.captureError("internal server error", 'controller.js : deletePrduct_info_byCategory ', 10)
+                                res.send(responses.generate(true, 'Failed to delete the doc', 500, null));
+                            } else if (check.isEmpty(result)) {t
+                                logger.captureError(` product info can not be found`, 'controller.js : deletePrduct_info_byCategory', 10);
+                                res.send(responses.generate(true, 'product info can not be found', 404, null));
+                            } else {
+                                logger.captureInfo("products' infos has been deleted", 'controller.js : deletePrduct_info_byCategory', 5);
+                                
+                                prod_id_array.push(obj.basic_info.product_id);
+                                res.send(responses.generate(false, `(${prod_id_array}) products info doc has been deleted`, 200, result));
+
+                            }
+                        })
+
+
+
+                    });
+                }
+            }
+        })
+}
+
 module.exports = {
     show_all: show_all,
     create_response: create_response,
     viewByproduct_id: viewByproduct_id,
-    viewBy_uuid: viewBy_uuid
+    viewBy_uuid: viewBy_uuid,
+    viewByCategory: viewByCategory,
+    editProduct_info: editProduct_info,
+    deleteProduct_info: deleteProduct_info,
+    deletePrduct_info_byCategory: deletePrduct_info_byCategory
 }
