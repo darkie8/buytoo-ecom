@@ -66,7 +66,7 @@ let create_response = (req, res) => {
         Resolution: reqBod.Resolution,
         Resolution_Type: reqBod.Resolution_Type,
         GPU: reqBod.GPU,
-        Display_Type: reqBod,
+        Display_Type: reqBod.Display_Type,
         Display_Colors: reqBod.Display_Colors
     })
 
@@ -164,7 +164,7 @@ let create_response = (req, res) => {
         rating_desc: rating,
         images: images,
         language: reqBod.language,
-        Date_first_available_at_buytoo: reqBod.Date_first_available_at_buytoo,
+        Date_first_available_at_buytoo: time.now,
         Last_bought: reqBod.Last_bought
     })
 
@@ -177,7 +177,7 @@ let create_response = (req, res) => {
         return init
     }
     let Bought_amount = sum()
-
+    let Added_to_cart_by = (!check.isEmpty(reqBod.Added_to_cart_by)) ? reqBod.Added_to_cart_by.split(',') : []
     let categories = (!check.isEmpty(reqBod.categories)) ? reqBod.categories.split(',') : ['default']
     let ecom_resp = new response_model.model_ecom({
         basic_info: basic_response,
@@ -204,6 +204,7 @@ let create_response = (req, res) => {
         Keypad: reqBod.Keypad,
         Graphics_PPI: reqBod.Graphics_PPI,
         Added_to_cart: reqBod.Added_to_cart,
+        Added_to_cart_by: Added_to_cart_by,
         Bought_amount: Bought_amount,
         Bought_by: Bought_by,
         Warranty_and_Gurantee: Warranty_and_Gurantee
@@ -309,23 +310,6 @@ let viewBy_uuid = (req, res) => {
  */
 let viewByCategory = (req, res) => {
     let categories1 = (!check.isEmpty(req.params.categories)) ? req.params.categories.split('_') : []
-
-    /*response_model.model_ecom.find({
-            "categories": [...categories1]
-        }).select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
-        .lean()
-        .exec((err, result) => {
-            if (err) {
-                logger.captureError("internal server error", 'controller.js : viewByCategory ', 10)
-                res.send(responses.generate(true, 'Failed to get', 500, null));
-            } else if (check.isEmpty(result)) {
-                logger.captureError(` product info can not be found`, 'controller.js : viewByCategory', 10);
-                res.send(responses.generate(true, 'product info can not be found', 404, null));
-            } else {
-                logger.captureInfo("products' infos has been found", 'controller.js : viewByCategory', 5);
-                res.send(responses.generate(false, `All product info details of ${categories1}  found`, 200, result));
-            }
-        })*/
 
 
     response_model.model_ecom.find()
@@ -578,7 +562,8 @@ let addUser_amout_bought = (req, res) => {
                     }, {
                         'Bought_by.users': users,
                         'Bought_by.number_of_times': number_of_times,
-                        'Bought_amount': Bought_amount
+                        'Bought_amount': Bought_amount,
+                        'basic_info.Last_bought': time.now
                     }, {
                         multi: true
                     }).exec((err, result) => {
@@ -627,7 +612,8 @@ let addUser_amout_bought = (req, res) => {
                     }, {
                         'Bought_by.users': users_updated,
                         'Bought_by.number_of_times': number_of_times_updated,
-                        'Bought_amount': Bought_amount
+                        'Bought_amount': Bought_amount,
+                        'basic_info.Last_bought': time.now
                     }, {
                         multi: true
                     }).exec((err, result) => {
