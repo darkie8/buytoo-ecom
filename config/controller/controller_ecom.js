@@ -6,7 +6,8 @@ const responses = require('./../../library/responseLib');
 const time = require('./../../library/timeLib');
 const check = require('./../../library/checkLib');
 const logger = require('./../../library/loggerLib');
-const other = require('./../../library/othersLib')
+const other = require('./../../library/othersLib');
+const user_need = require('./../../library/userLib')
 // Importing model_ecom 
 let zoomba = mongoose.model('test_6');
 
@@ -23,8 +24,9 @@ const response_model = {
     Battery_and_Power_Features: mongoose.model('battery1'),
     Dimensions: mongoose.model('dimensions1'),
     Warranty_and_Gurantee: mongoose.model('warrany_gurantee2'),
-    basic: mongoose.model('test_6_basic_info'),
-    model_ecom: mongoose.model('model_ecomF')
+    basic: mongoose.model('test_6_basic_info1'),
+    bought_by: mongoose.model('Bought_by1'),
+    model_ecom: mongoose.model('model_ecomFinal1')
 }
 
 
@@ -83,28 +85,35 @@ let create_response = (req, res) => {
         Supported_Memory_Card_Type: reqBod.Supported_Memory_Card_Type,
         Memory_Card_Slot_Type: reqBod.Memory_Card_Slot_Type
     })
+    let Network_Type = (!check.isEmpty(reqBod.Network_Type)) ? reqBod.Network_Type.split(',') : ['default']
+
+    let Supported_Networks = (!check.isEmpty(reqBod.Supported_Networks)) ? reqBod.Supported_Networks.split(',') : ['default']
 
     let Connectivity_Features = new response_model.Connectivity_Features({
-        Network_Type: reqBod.Network_Type,
-        Supported_Networks: reqBod.Supported_Networks,
+        Network_Type: Network_Type,
+        Supported_Networks: Supported_Networks,
         threeG: reqBod.threeG,
         Bluetooth_Support: reqBod.Bluetooth_Support,
         Bluetooth_Version: reqBod.Bluetooth_Support,
         Wi_Fi: reqBod.Wi_Fi,
         Audio_Jack: reqBod.Audio_Jack
     })
+    let Audio_Formats = (!check.isEmpty(reqBod.Audio_Formats)) ? reqBod.Audio_Formats.split(',') : ['default']
+    let Video_Formats = (!check.isEmpty(reqBod.Video_Formats)) ? reqBod.Video_Formats.split(',') : ['default']
 
     let Multimedia_Features = new response_model.Multimedia_Features({
         FM_Radio: reqBod.FM_Radio,
         FM_Radio_Recording: reqBod.FM_Radio_Recording,
-        Audio_Formats: reqBod.Audio_Formats,
-        Video_Formats: reqBod.Video_Formats
+        Audio_Formats: Audio_Formats,
+        Video_Formats: Video_Formats
     })
+
+    let Primary_Camera_Features = (!check.isEmpty(reqBod.Primary_Camera_Features)) ? reqBod.Primary_Camera_Features.split(',') : ['default']
 
     let Camera_Features = new response_model.Camera_Features({
         Primary_Camera_Available: reqBod.Primary_Camera_Available,
         Primary_Camera: reqBod.Primary_Camera,
-        Primary_Camera_Features: reqBod.Primary_Camera_Features,
+        Primary_Camera_Features: Primary_Camera_Features,
         Secondary_Camera_Available: reqBod.Secondary_Camera_Available,
         Secondary_Camera: reqBod.Secondary_Camera,
         Flash: reqBod.Flash,
@@ -122,13 +131,20 @@ let create_response = (req, res) => {
         Depth: reqBod.Depth,
         Weight: reqBod.Weight
     })
-
+    let users = (!check.isEmpty(reqBod.users)) ? reqBod.users.split(',') : []
+    let number_of_times_strings = (!check.isEmpty(reqBod.number_of_times)) ? reqBod.number_of_times.split(',') : []
+    let number_of_times = number_of_times_strings.map(obj => Number(obj))
+    let Bought_by = new response_model.bought_by({
+        users: users,
+        number_of_times: number_of_times
+    })
     let Warranty_and_Gurantee = new response_model.Warranty_and_Gurantee({
         Warranty_Summary: reqBod.Warranty_Summary,
         Gurantee_Summary: reqBod.Gurantee_Summary
     })
     let product_id = shortid.generate();
-    let basic_response = {
+    let images = (!check.isEmpty(reqBod.images)) ? reqBod.images.split(',') : ['default']
+    let basic_response = new response_model.basic({
         url: 'https://buytoo.in',
         uuid: shortid.generate(),
         source: source,
@@ -146,12 +162,23 @@ let create_response = (req, res) => {
         Clasp: `${product_id}+clasp`,
         Item_Weight: reqBod.Item_Weight,
         rating_desc: rating,
-        images: reqBod.images,
+        images: images,
         language: reqBod.language,
         Date_first_available_at_buytoo: reqBod.Date_first_available_at_buytoo,
         Last_bought: reqBod.Last_bought
+    })
+
+
+    let sum = () => {
+        var init = 0
+        for (const value of number_of_times) {
+            init = init + value
+        }
+        return init
     }
-    let categories = (!check.isEmpty(reqBod.categories)) ? reqBod.categories.split(',') : []
+    let Bought_amount = sum()
+
+    let categories = (!check.isEmpty(reqBod.categories)) ? reqBod.categories.split(',') : ['default']
     let ecom_resp = new response_model.model_ecom({
         basic_info: basic_response,
         Browse_Type: reqBod.Browse_Type,
@@ -176,6 +203,9 @@ let create_response = (req, res) => {
         Removable_Battery: reqBod.Removable_Battery,
         Keypad: reqBod.Keypad,
         Graphics_PPI: reqBod.Graphics_PPI,
+        Added_to_cart: reqBod.Added_to_cart,
+        Bought_amount: Bought_amount,
+        Bought_by: Bought_by,
         Warranty_and_Gurantee: Warranty_and_Gurantee
     })
 
@@ -198,7 +228,7 @@ let show_all = (req, res) => {
 
 
     response_model.model_ecom.find()
-        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
         .lean()
         .exec((err, result) => {
             if (err) {
@@ -222,7 +252,7 @@ let show_all = (req, res) => {
 let viewByproduct_id = (req, res) => {
 
     response_model.model_ecom.find()
-        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
         .lean()
         .exec((err, result) => {
 
@@ -251,7 +281,7 @@ let viewByproduct_id = (req, res) => {
 let viewBy_uuid = (req, res) => {
 
     response_model.model_ecom.find()
-        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
         .lean()
         .exec((err, result) => {
 
@@ -282,7 +312,7 @@ let viewByCategory = (req, res) => {
 
     /*response_model.model_ecom.find({
             "categories": [...categories1]
-        }).select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        }).select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
         .lean()
         .exec((err, result) => {
             if (err) {
@@ -299,7 +329,7 @@ let viewByCategory = (req, res) => {
 
 
     response_model.model_ecom.find()
-        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id')
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
         .lean()
         .exec((err, result) => {
 
@@ -416,12 +446,12 @@ let deletePrduct_info_byCategory = (req, res) => {
                             if (err) {
                                 logger.captureError("internal server error", 'controller.js : deletePrduct_info_byCategory ', 10)
                                 res.send(responses.generate(true, 'Failed to delete the doc', 500, null));
-                            } else if (check.isEmpty(result)) {t
+                            } else if (check.isEmpty(result)) {
                                 logger.captureError(` product info can not be found`, 'controller.js : deletePrduct_info_byCategory', 10);
                                 res.send(responses.generate(true, 'product info can not be found', 404, null));
                             } else {
                                 logger.captureInfo("products' infos has been deleted", 'controller.js : deletePrduct_info_byCategory', 5);
-                                
+
                                 prod_id_array.push(obj.basic_info.product_id);
                                 res.send(responses.generate(false, `(${prod_id_array}) products info doc has been deleted`, 200, result));
 
@@ -436,6 +466,229 @@ let deletePrduct_info_byCategory = (req, res) => {
         })
 }
 
+/**
+ * function to implement the product's offer price.
+ */
+let implementing_offer_price = (req, res) => {
+    response_model.model_ecom.update({
+            'basic_info.product_id': req.params.product_id
+        }, {
+            'basic_info.offer_price': req.body.offer_price,
+            'basic_info.on_sale': 'yes'
+        })
+        .exec((err, result) => {
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : implementing_offer_price ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : implementing_offer_price', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                logger.captureInfo("products' infos has been found", 'controller.js : implementing_offer_price', 5);
+                res.send(responses.generate(false, `offer price of ${req.params.product_id} has been updated`, 200, result));
+            }
+        })
+}
+
+/**
+ * function to add products to cart.
+ */
+let addremoveProduct_to_cart = (req, res) => {
+    response_model.model_ecom.update({
+            'basic_info.product_id': req.params.product_id
+        }, {
+            'Added_to_cart': req.body.Added_to_cart
+        })
+        .exec((err, result) => {
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : addremoveProduct_to_cart ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : addremoveProduct_to_cart', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                logger.captureInfo("products' infos has been found", 'controller.js : addremoveProduct_to_cart', 5);
+                res.send(responses.generate(false, `product ${req.params.product_id} has been added to cart `, 200, result));
+            }
+        })
+}
+
+/**
+ * function to see  products added to cart or not added to cart.
+ */
+let findproductsadded_to_cart_or_not_added = (req, res) => {
+    response_model.model_ecom.find({
+            'Added_to_cart': req.params.Added_to_cart
+        })
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
+        .lean()
+        .exec((err, result) => {
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : findproductsadded_to_cart_or_not_added ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : findproductsadded_to_cart_or_not_added', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                logger.captureInfo("products' infos has been found", 'controller.js : findproductsadded_to_cart_or_not_added', 5);
+                res.send(responses.generate(false, `products infos has been found `, 200, result));
+            }
+        })
+}
+
+/**
+ * function to set user and amount they have bought.
+ */
+let addUser_amout_bought = (req, res) => {
+    let reqBod = req.body
+    // finding certain product doc to use the user related sub-doc infos
+    response_model.model_ecom.findOne({
+            'basic_info.product_id': req.params.product_id
+        })
+        .exec((err, result) => {
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : addUser_amout_bought ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : addUser_amout_bought', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                logger.captureInfo("products' infos has been found", 'controller.js : addUser_amout_bought', 5);
+
+                // making array out of request body inputs of various field
+                let users = (!check.isEmpty(reqBod.users)) ? reqBod.users.split(',') : []
+                let number_of_times_strings = (!check.isEmpty(reqBod.number_of_times)) ? reqBod.number_of_times.split(',') : []
+                let number_of_times = number_of_times_strings.map(obj => Number(obj))
+                
+                // defining sum(x) function
+                let sum = (x) => {
+                    var init = 0
+                    for (const value of x) {
+                        init = init + value
+                    }
+                    return init
+                }
+
+                // if user field has not being assigned 
+                if (result.Bought_by.users.length === 0) {
+                    //total amount bought
+                    let Bought_amount = sum(number_of_times)
+                    response_model.model_ecom.update({
+                        'basic_info.product_id': req.params.product_id
+                    }, {
+                        'Bought_by.users': users,
+                        'Bought_by.number_of_times': number_of_times,
+                        'Bought_amount': Bought_amount
+                    }, {
+                        multi: true
+                    }).exec((err, result) => {
+
+                        if (err) {
+                            logger.captureError("internal server error", 'controller.js : addUser_amout_bought ', 10)
+                            res.send(responses.generate(true, 'Failed to edit the doc', 500, null));
+                        } else if (check.isEmpty(result)) {
+                            logger.captureError(` product info can not be found`, 'controller.js : addUser_amout_bought', 10);
+                            res.send(responses.generate(true, 'product info can not be found', 404, null));
+                        } else {
+                            logger.captureInfo("products' infos has been updated", 'controller.js : addUser_amout_bought', 5);
+                            res.send(responses.generate(false, `${req.params.product_id} id product info doc has been updated`, 200, result));
+
+                        }
+                    })
+
+
+
+
+                } // end of the condition
+                else { // if user field has been assigned 
+
+                    // to delete duplicated element while adding to user field
+                    let set1 = new Set([...result.Bought_by.users, ...users])
+                    let users_updated = [...set1];
+
+                    // updating how many times product has been bought by an individual user
+                    let number_of_times_updated = users_updated.map((obj, i) =>
+                       {
+                           if(result.Bought_by.users.indexOf(obj) == -1){
+                               return number_of_times[users.indexOf(obj)]
+                           }
+                           else if(users.indexOf(obj) !== -1){
+                               return result.Bought_by.number_of_times[i] + number_of_times[users.indexOf(obj)]
+                           } else {
+                               return 10
+                           }
+                       })
+                   
+                        // total amount bought 
+                        let Bought_amount = sum(number_of_times_updated)
+                        // updating the doc with new infos 
+                    response_model.model_ecom.update({
+                        'basic_info.product_id': req.params.product_id
+                    }, {
+                        'Bought_by.users': users_updated,
+                        'Bought_by.number_of_times': number_of_times_updated,
+                        'Bought_amount': Bought_amount
+                    }, {
+                        multi: true
+                    }).exec((err, result) => {
+
+                        if (err) {
+                            logger.captureError("internal server error", 'controller.js : editProduct_info ', 10)
+                            res.send(responses.generate(true, 'Failed to edit the doc', 500, null));
+                        } else if (check.isEmpty(result)) {
+                            logger.captureError(` product info can not be found`, 'controller.js : editProduct_info', 10);
+                            res.send(responses.generate(true, 'product info can not be found', 404, null));
+                        } else {
+                            logger.captureInfo("products' infos has been updated", 'controller.js : editProduct_info', 5);
+                            res.send(responses.generate(false, `${req.params.product_id} id product info doc has been updated`, 200, result));
+
+                        }
+                    }) 
+
+                }
+
+
+
+            }
+        })
+}
+
+
+/**
+ * function to find product which has been bought by a certain user
+ */
+let viewByusers_bought_by = (req, res) => {
+    let users = (!check.isEmpty(req.params.users)) ? req.params.users.split('_') : []
+    response_model.model_ecom.find()
+        .select('-__v -_id -basic_info._id -basic_info.source._id -basic_info.description._id -basic_info.rating_desc._id -Display_Features._id -Os_and_Processor_Features._id -Memory_and_Storage_Features._id -Camera_Features._id -Connectivity_Features._id -Multimedia_Features._id -Battery_and_Power_Features._id -Dimensions._id -Warranty_and_Gurantee._id -Bought_by._id -Bought_amount._id')
+        .lean()
+        .exec((err, result) => {
+
+            if (err) {
+                logger.captureError("internal server error", 'controller.js : viewByusers_bought_by ', 10)
+                res.send(responses.generate(true, 'Failed to get', 500, null));
+            } else if (check.isEmpty(result)) {
+                logger.captureError(` product info can not be found`, 'controller.js : viewByusers_bought_by', 10);
+                res.send(responses.generate(true, 'product info can not be found', 404, null));
+            } else {
+                if (result.every(obj => {
+                        let set1 = new Set([...obj.Bought_by.users, ...users])
+                        return obj.Bought_by.users.length !== [...set1].length
+                    })) {
+
+                    logger.captureError(` product info can not be found`, 'controller.js : viewByusers_bought_by', 10);
+                    res.send(responses.generate(true, 'product info can not be found', 404, null));
+                } else {
+                    let result_indv = result.filter(obj => {
+                        let set1 = new Set([...obj.Bought_by.users, ...users])
+                        return obj.Bought_by.users.length === [...set1].length
+                    })
+                    logger.captureInfo("products' infos has been found", 'controller.js : viewByusers_bought_by', 5);
+                    res.send(responses.generate(false, `All product info details bought by ${users}  found`, 200, result_indv));
+                }
+            }
+        })
+}
 module.exports = {
     show_all: show_all,
     create_response: create_response,
@@ -444,5 +697,10 @@ module.exports = {
     viewByCategory: viewByCategory,
     editProduct_info: editProduct_info,
     deleteProduct_info: deleteProduct_info,
-    deletePrduct_info_byCategory: deletePrduct_info_byCategory
+    deletePrduct_info_byCategory: deletePrduct_info_byCategory,
+    implementing_offer_price: implementing_offer_price,
+    addremoveProduct_to_cart: addremoveProduct_to_cart,
+    findproductsadded_to_cart_or_not_added: findproductsadded_to_cart_or_not_added,
+    addUser_amout_bought: addUser_amout_bought,
+    viewByusers_bought_by: viewByusers_bought_by
 }

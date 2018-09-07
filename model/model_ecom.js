@@ -1,7 +1,7 @@
 // mongoose 
 let mongoose = require("mongoose");
 let schema = mongoose.Schema;
-
+let user = require('./../library/userLib');
 // source schema declaration
 let source = new schema({
   site: {
@@ -368,6 +368,18 @@ let Warranty_and_Gurantee = new schema({
   }
 })
 
+
+// bought by
+
+let Bought_by = new schema({
+   users: {
+     type: Array
+   },
+   number_of_times: {
+     type: Array
+   } 
+})
+
 // ecom schema for watch declaration 
 let ecomSchema = new schema({
   basic_info: basic_info,
@@ -385,7 +397,7 @@ let ecomSchema = new schema({
   },
   categories: {
     type: Array,
-   
+   default: ['default']
   },
   Browse_Type: {
     type: String,
@@ -436,6 +448,20 @@ let ecomSchema = new schema({
     type: String,
     
   },
+  Added_to_cart: {
+    type: Boolean,
+    default: false
+  },
+  Added_to_cart_by: {
+    type: Array,
+    default: []
+  }
+  ,
+  Bought_amount: {
+     type: Number,
+     default: 0
+  },
+  Bought_by : Bought_by,
   Warranty_and_Gurantee: Warranty_and_Gurantee
 })
 
@@ -448,7 +474,7 @@ let test_6  = new schema({
 mongoose.model('test_6_basic_info_source', source)
 mongoose.model('test_6_basic_info_desc', desc)
 mongoose.model('test_6_basic_info_rating', rating)
-mongoose.model('test_6_basic_info', basic_info)
+mongoose.model('test_6_basic_info1', basic_info)
 mongoose.model('display1', Display_Features);
 mongoose.model('os_processor1', Os_and_Processor_Features);
 mongoose.model('memory1', Memory_and_Storage_Features);
@@ -457,9 +483,10 @@ mongoose.model('multimedia1', Multimedia_Features);
 mongoose.model('camera1', Camera_Features);
 mongoose.model('battery1', Battery_and_Power_Features);
 mongoose.model('dimensions1', Dimensions);
+mongoose.model('Bought_by1', Bought_by);
 mongoose.model('warrany_gurantee2', Warranty_and_Gurantee);
 mongoose.model('test_6', test_6)
-mongoose.model('model_ecomF', ecomSchema);
+mongoose.model('model_ecomFinal1', ecomSchema);
 
 
 
